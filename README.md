@@ -17,18 +17,100 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
+Real world systems use both collaborative filtering and content-based filtering in order to create recommendations for their users. For example, real world systems like Youtube may use collaboritate filtering by recognizing patterns within a users behavior. For example, if two users watch similar videos, Youtube may suggest videos watched by one user to the other. On the other hand Spotify uses lots of content-based filtering by extracting metadata from songs as well as performing audio analysis in order to match songs based on their sound and audio cues, rather than simply based off patterns. These two coupled together create very robust recommendation systems. My version will mostly be focusing on content based filtering, as we're closely looking at music metadata in order to create recommendations for a user.
+
 Explain your design in plain language.
 
 Some prompts to answer:
 
 - What features does each `Song` use in your system
   - For example: genre, mood, energy, tempo
+  Each song in my system uses the features of: Genre,
+  mood, energy, tempo_bpm, valence, danceability, and acousticness. 
 - What information does your `UserProfile` store
+  Each UserProfile stores the users favorite_genre, the users favorite_mood, their target_energy for how energetic they want their music to be, likes_acoustic for whether they like produced or acoustic sounds, target_tempo for tempo preferences and target_valence, for valence preferences.
 - How does your `Recommender` compute a score for each song
+  To start, each song will get a score from 0-6, which will be calculated as follows:
+  1. +2.0 points for a genre match
+  2. +1.0 point for a mood match
+  3. +.5 point for an acoustic match. high accousticness >0.5,  
+  4. up to +1.0 point for matching energy via Gaussian Proximity formula
+  5. up to +.5 point for matching valence via Gaussian Proximity formula
+  6. up to +.5 point for matching tempo via Gaussian Proximity formula
+  
+  The final score is then calculated via a sum across all features.
+
 - How do you choose which songs to recommend
+  my `recommend_songs` function runs the `score_song` function on every song in the catalog, then:
+
+1. Sorts all songs by score, highest first
+2. Returns the top `k` results (default: 5)
+3. Attaches an explanation string for each pick, describing why it matched
+
+Any biases may occur due to the high weight of genre matching, where it could ignore good suggestions simply because the genre isnt the same.
+
 
 You can include a simple diagram or bullet list if helpful.
 
+Taste profile:
+
+user_prefs = {
+    "favorite_genre": "pop",
+    "favorite_mood":  "happy",
+    "target_energy":  0.80,   
+    "likes_acoustic": False 
+}
+
+Gave this to AI and it suggested this for my user_perfs as my prior design was somewhat narrow and this can help without expanding the user_perfs too much:
+
+user_prefs = {
+    "favorite_genre": "pop",
+    "favorite_mood":  "happy",
+    "target_energy":  0.80, 
+    "target_tempo":   120,   
+    "target_valence": 0.80,   
+    "likes_acoustic": False  
+}
+
+Recipe:
++2.0 points for a genre match
++1.0 point for a mood match
++0-1.0 point for energy match
+Similarity points on acousticness and valence
+
+
+Design visualization: 
+flowchart TD
+    A([User Preferences\ngenre · mood · energy · valence · tempo · likes_acoustic]) --> B
+
+    B[load_songs\ndata/songs.csv\n10 song dictionaries] --> C
+
+    C{recommend_songs\nLoop over every song} --> D
+
+    D[score_song\nSong 1 of 10] --> E
+    E{Categorical Checks}
+    E -->|genre match| F[+2.0 pts]
+    E -->|mood match| G[+1.0 pts]
+    E -->|acoustic match| H[+0.5 pts]
+
+    D --> I{Numerical Proximity}
+    I -->|energy Gaussian| J[up to +1.0 pts]
+    I -->|valence Gaussian| K[up to +0.5 pts]
+    I -->|tempo Gaussian| L[up to +0.5 pts]
+
+    F & G & H & J & K & L --> M[Sum → Song Score 0–6.0]
+    M --> N{More songs?}
+    N -->|Yes — next song| D
+    N -->|No| O
+
+    O[Sort all scores\nhighest → lowest] --> P
+
+    P[Return Top K songs\nwith score + reasons]
+
+    P --> Q([Output\n#1 Sunrise City · 5.47\n#2 Rooftop Lights · 3.80\n#3 Gym Hero · 3.50])
+
+
+(ADD image here.)
 ---
 
 ## Getting Started
