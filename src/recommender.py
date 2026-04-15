@@ -77,10 +77,10 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     score = 0.0
     reasons = []
 
-    # 1. Genre match: +2.0
+    # 1. Genre match: +1.0 (halved from original +2.0)
     if song.get('genre') == user_prefs.get('favorite_genre'):
-        score += 2.0
-        reasons.append('genre match (+2.0)')
+        score += 1.0
+        reasons.append('genre match (+1.0)')
 
     # 2. Mood match: +1.0
     if song.get('mood') == user_prefs.get('favorite_mood'):
@@ -99,8 +99,8 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     def gaussian(song_val: float, target: float, sigma: float) -> float:
         return math.exp(-((song_val - target) ** 2) / (2 * sigma ** 2))
 
-    # 4. Energy proximity: up to +1.0 (sigma=0.2 on 0-1 scale)
-    energy_pts = round(gaussian(song.get('energy', 0), user_prefs.get('target_energy', 0.5), 0.2), 2)
+    # 4. Energy proximity: up to +2.0 (doubled from original +1.0; sigma=0.2 on 0-1 scale)
+    energy_pts = round(gaussian(song.get('energy', 0), user_prefs.get('target_energy', 0.5), 0.2) * 2.0, 2)
     score += energy_pts
     reasons.append(f'energy proximity (+{energy_pts})')
 

@@ -30,7 +30,7 @@ Some prompts to answer:
 - What information does your `UserProfile` store
   Each UserProfile stores the users favorite_genre, the users favorite_mood, their target_energy for how energetic they want their music to be, likes_acoustic for whether they like produced or acoustic sounds, target_tempo for tempo preferences and target_valence, for valence preferences.
 - How does your `Recommender` compute a score for each song
-  To start, each song will get a score from 0-6, which will be calculated as follows:
+  To start, each song will get a score from 0-5.5, which will be calculated as follows:
   1. +2.0 points for a genre match
   2. +1.0 point for a mood match
   3. +.5 point for an acoustic match. high accousticness >0.5,  
@@ -77,41 +77,25 @@ Recipe:
 +1.0 point for a mood match
 +0-1.0 point for energy match
 Similarity points on acousticness and valence
+(not used.)
 
-
-Design visualization: 
-flowchart TD
-    A([User Preferences\ngenre · mood · energy · valence · tempo · likes_acoustic]) --> B
-
-    B[load_songs\ndata/songs.csv\n10 song dictionaries] --> C
-
-    C{recommend_songs\nLoop over every song} --> D
-
-    D[score_song\nSong 1 of 10] --> E
-    E{Categorical Checks}
-    E -->|genre match| F[+2.0 pts]
-    E -->|mood match| G[+1.0 pts]
-    E -->|acoustic match| H[+0.5 pts]
-
-    D --> I{Numerical Proximity}
-    I -->|energy Gaussian| J[up to +1.0 pts]
-    I -->|valence Gaussian| K[up to +0.5 pts]
-    I -->|tempo Gaussian| L[up to +0.5 pts]
-
-    F & G & H & J & K & L --> M[Sum → Song Score 0–6.0]
-    M --> N{More songs?}
-    N -->|Yes — next song| D
-    N -->|No| O
-
-    O[Sort all scores\nhighest → lowest] --> P
-
-    P[Return Top K songs\nwith score + reasons]
-
-    P --> Q([Output\n#1 Sunrise City · 5.47\n#2 Rooftop Lights · 3.80\n#3 Gym Hero · 3.50])
-
-
-(ADD image here.)
+![Design Visualization](./images/User%20Preference%20Song-2026-04-15-051903.png)
 ---
+
+![Working Code](./images/Working%20SS.png)
+---
+### Profile screenshots
+![Sunday Morning](./images/Sunday.png)
+![Late-Night Coder](./images/Coder.png)
+![Hype Gym-Goer](./images/Hype.png)
+![Ghost Genre](./images/Mismatch1.png)
+![Acoustic Contradiction](./images/Mismatch2.png)
+![Perfect Clone](./images/Mismatch3.png)
+![Genre–Mood Mismatch](./images/Mismatch4.png)
+![All Zeros Extremist](./images/Mismatch5.png)
+![The Boundary Tester](./images/Mismatch6.png)
+
+
 
 ## Getting Started
 
